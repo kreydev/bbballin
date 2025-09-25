@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics;
+using Unity.VisualScripting;
+using UnityEngine;
 
 // Include the namespace required to use Unity UI
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour {
-   
+
    // Create public variables for player speed, and for the Text UI game objects
    public float speed;
    public Text countText;
@@ -15,6 +18,8 @@ public class PlayerController : MonoBehaviour {
    public int count;
 
    [SerializeField] CameraController cam;
+
+   public float Size { get { return Mathf.Log(count + 1) * .5f; } }
 
    // At the start of the game..
    void Start()
@@ -29,9 +34,7 @@ public class PlayerController : MonoBehaviour {
       SetCountText();
 
       // Set the text property of our Win Text UI to an empty string, making the 'You Win' (game over message) blank
-      winText.text = "";
-      // transform.localScale = Vector3.one * Mathf.Log(2);
-      
+      winText.text = "";      
    }
 
    // Each physics step..
@@ -42,7 +45,7 @@ public class PlayerController : MonoBehaviour {
       float moveVertical = Input.GetAxis("Vertical");
 
       // Create a Vector3 variable, and assign X and Z to feature our horizontal and vertical float variables above
-      Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
+      Vector3 movement = new(moveHorizontal, 0.0f, moveVertical);
 
       // Add a physical force to our Player rigidbody using our 'movement' Vector3 above, 
       // multiplying it by 'speed' - our public player speed that appears in the inspector
@@ -63,7 +66,6 @@ public class PlayerController : MonoBehaviour {
 
          // Add one to the score variable 'count'
          ++count;
-         cam.offset = cam.initialOffset * Mathf.Log(count + 1) * .5f; 
 
          // Run the 'SetCountText()' function (see below)
          SetCountText();

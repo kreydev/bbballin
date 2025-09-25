@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Diagnostics;
-using Unity.VisualScripting;
 
 public class CameraController : MonoBehaviour
 {
 
-   public GameObject player;
+   public PlayerController player;
    public Vector3 offset;
    public Vector3 initialOffset;
 
@@ -23,6 +20,11 @@ public class CameraController : MonoBehaviour
       transform.LookAt(player.transform);
       // Set the position of the Camera (the game object this script is attached to)
       // to the player's position, plus the offset amount
+      if (Physics.Raycast(player.transform.position, Vector3.back, maxDistance: player.Size + 8, layerMask: LayerMask.GetMask("wall")))
+      {
+         offset = new Vector3(offset.x, initialOffset.y + 5, initialOffset.z / 5);
+      }
+      else { offset = initialOffset * player.Size; }
       transform.position = Vector3.Lerp(transform.position, player.transform.position + offset, .1f);
    }
 }
