@@ -59,6 +59,7 @@ public class PlayerController : MonoBehaviour {
       {
          // Make the other game object (the pick up) inactive, to make it disappear
          other.GetComponent<Pickup>().PickedUp();
+         GameManager.Singleton.SpawnNewCoin();
 
          // Add one to the score variable 'count'
          ++count;
@@ -73,7 +74,7 @@ public class PlayerController : MonoBehaviour {
    void SetCountText()
    {
       // Update the text field of our 'countText' variable
-      countText.text = "Count: " + count.ToString ();
+      countText.text = "Count: " + count.ToString();
 
       // // Check if our 'count' is equal to or exceeded 12
       // if (count >= 12) 
