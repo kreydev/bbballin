@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour {
 
    [SerializeField] CameraController cam;
 
-   public float Size { get { return Mathf.Log(count + 1) * .5f; } }
+   public float Size { get { return count >= 1 ? Mathf.Log(count + 1) * 2 : 1f; } }
 
    // At the start of the game..
    void Start()
@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour {
       // Add a physical force to our Player rigidbody using our 'movement' Vector3 above, 
       // multiplying it by 'speed' - our public player speed that appears in the inspector
       rb.AddForce(movement * speed);
-      transform.localScale = Vector3.Slerp(transform.localScale, Vector3.one * (count >= 1 ? Mathf.Log(count + 1) * 2 : 1f), .1f);
+      transform.localScale = Vector3.Slerp(transform.localScale, Vector3.one * Size, .1f);
    }
 
    // When this game object intersects a collider with 'is trigger' checked, 

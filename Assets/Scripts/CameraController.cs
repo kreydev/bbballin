@@ -20,11 +20,11 @@ public class CameraController : MonoBehaviour
       transform.LookAt(player.transform);
       // Set the position of the Camera (the game object this script is attached to)
       // to the player's position, plus the offset amount
-      if (Physics.Raycast(player.transform.position, Vector3.back, maxDistance: player.Size + 8, layerMask: LayerMask.GetMask("wall")))
+      if (Physics.Raycast(player.transform.position, Vector3.back, maxDistance: (player.Size + 3) * 1.5f, layerMask: LayerMask.GetMask("wall")))
       {
-         offset = new Vector3(offset.x, initialOffset.y + 5, initialOffset.z / 5);
+         offset = new Vector3(offset.x, (player.Size + 5) * 2f, initialOffset.z / 5);
       }
-      else { offset = initialOffset * player.Size; }
+      else { offset = initialOffset * player.Size / 5; }
       transform.position = Vector3.Lerp(transform.position, player.transform.position + offset, .1f);
    }
 }
