@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(AudioSource))]
 public class Pickup : MonoBehaviour
 {
 	public AudioClip pickupSound;

@@ -16,10 +16,12 @@ public class PlayerController : MonoBehaviour {
    // Create private references to the rigidbody component on the player, and the count of pick up objects picked up so far
    private Rigidbody rb;
    public int count;
+   public bool Walled { get { return Physics.Raycast(transform.position, Vector3.back, maxDistance: (Size + 3) * 1.5f, layerMask: LayerMask.GetMask("wall")); } }
 
    [SerializeField] CameraController cam;
 
    public float Size { get { return count >= 1 ? Mathf.Log(count + 1) * 2 : 1f; } }
+   
 
    // At the start of the game..
    void Start()
@@ -30,11 +32,8 @@ public class PlayerController : MonoBehaviour {
       // Set the count to zero 
       count = 1;
 
-      // Run the SetCountText function to update the UI (see below)
-      SetCountText();
-
       // Set the text property of our Win Text UI to an empty string, making the 'You Win' (game over message) blank
-      winText.text = "";      
+      // winText.text = "";      
    }
 
    // Each physics step..
@@ -66,23 +65,7 @@ public class PlayerController : MonoBehaviour {
 
          // Add one to the score variable 'count'
          ++count;
-
-         // Run the 'SetCountText()' function (see below)
-         SetCountText();
       }
    }
 
-   // Create a standalone function that can update the 'countText' UI and check if the required amount to win has been achieved
-   void SetCountText()
-   {
-      // Update the text field of our 'countText' variable
-      countText.text = "Count: " + count.ToString();
-
-      // // Check if our 'count' is equal to or exceeded 12
-      // if (count >= 12) 
-      // {
-      // 	// Set the text value of our 'winText'
-      // 	winText.text = "You Win!";
-      // }
-   }
 }
