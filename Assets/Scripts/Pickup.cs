@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Mirror;
-using Unity.VisualScripting;
+public enum PType { Coin, Vector, Speedster, Maniac,  }
 
 [RequireComponent(typeof(Renderer))]
 [RequireComponent(typeof(AudioSource))]
@@ -11,7 +11,8 @@ public class Pickup : NetworkBehaviour
 	Vector3 rotVel;
 
 
-	void Awake() {
+	void Awake()
+	{
 		rotVel = new Vector3(Random.Range(13, 17), Random.Range(28, 32), Random.Range(43, 47)) * 2;
 	}
 
@@ -24,14 +25,25 @@ public class Pickup : NetworkBehaviour
 		transform.Rotate(rotVel * Time.deltaTime);
 	}
 
-	public void PickedUp() { StartCoroutine(nameof(PickedUpC)); }
+	[Command(requiresAuthority = false)]
+	public void PickedUp()
+	{
+		PlaySounds();
+		StartCoroutine(nameof(PickedUpC));
+	}
 
-	IEnumerator PickedUpC()
+	[ClientRpc]
+	void PlaySounds()
 	{
 		GetComponent<Renderer>().enabled = false;
 		AudioSource ac = GetComponent<AudioSource>();
 		ac.pitch = Random.Range(.9f, 1.3f);
 		ac.PlayOneShot(pickupSound);
+	}
+
+
+	IEnumerator PickedUpC()
+	{
 		yield return new WaitForSecondsRealtime(2);
 		NetworkServer.UnSpawn(gameObject);
 		Destroy(gameObject);

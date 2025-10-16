@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
+using Mirror;
 
 public class MusicManager : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class MusicManager : MonoBehaviour
       if (me != null) cur = Mathf.Clamp(me.Count / musicDenom / music.Length, 0, music.Length - 1);
    }
 
-   public void SetCave(bool val)
+   [Client] public void SetCave(bool val)
    {
       weights[0] = val ? 0 : 1;
       weights[1] = val ? 1 : 0;

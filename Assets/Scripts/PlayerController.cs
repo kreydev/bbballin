@@ -12,14 +12,12 @@ public class PlayerController : NetworkBehaviour {
 
    // Create public variables for player speed, and for the Text UI game objects
    public float speed;
-   public Text countText;
-   public Text winText;
 
    // Create private references to the rigidbody component on the player, and the count of pick up objects picked up so far
    private Rigidbody rb;
-   int count;
-   [Command(requiresAuthority = false)] void setCount(int value) { count = value; }
-   public int Count { get { return count; }  set { setCount(value); } }
+   [SyncVar] int count;
+   [Command(requiresAuthority = false)] void SetCount(int value) { count = value; }
+   public int Count { get { return count; }  set { SetCount(value); } }
    public float caveHeight;
    public bool Walled { get { return Physics.Raycast(transform.position, Vector3.back, maxDistance: (Size + 3) * 1.5f, layerMask: LayerMask.GetMask("wall")); } }
    public bool Caved { get { return Physics.Raycast(rb.position, Vector3.up, maxDistance: (Size + 3 + caveHeight) * 1.5f, layerMask: LayerMask.GetMask("wall")); } }
@@ -34,10 +32,12 @@ public class PlayerController : NetworkBehaviour {
    public static PlayerController Me { get
       {
          var pcs = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
-         if (pcs.Length == 0) return null;
          if (pcs.Length > 1)
+         {
             foreach (var p in pcs) { if (p.isLocalPlayer) return p; }
-         return pcs[0];
+            return pcs[0];
+         }
+         else return null;
       }
    }
    
@@ -45,15 +45,21 @@ public class PlayerController : NetworkBehaviour {
    // At the start of the game..
    void Start()
    {
-      // Assign the Rigidbody component to our private rb variable
-      rb = GetComponent<Rigidbody>();
+         // Assign the Rigidbody component to our private rb variable
+         rb = GetComponent<Rigidbody>();
 
-      // Set the count to zero 
-      Count = 1;
-      mm = MusicManager.Singleton;
-      gm = GameManager.Singleton;
-      igg = IngameGUI.Singleton;
-      igg.CoinText = Count.ToString();   
+         // Set the count to zero
+         mm = MusicManager.Singleton;
+         gm = GameManager.Singleton;
+         igg = IngameGUI.Singleton;
+      if (isLocalPlayer) {
+         SetCount(1);
+         igg.CoinText = Count.ToString();
+         igg.ShowIcons = true;
+      } else
+      {
+         cam.gameObject.SetActive(false);
+      }
    }
 
    // Each physics step..
@@ -78,6 +84,7 @@ public class PlayerController : NetworkBehaviour {
    // store a reference to that collider in a variable named 'other'..
    void OnTriggerEnter(Collider other)
    {
+      if (!isLocalPlayer) return;
       // ..and if the game object we intersect has the tag 'Pick Up' assigned to it..
       if (other.gameObject.CompareTag("Pick Up"))
       {
@@ -86,14 +93,20 @@ public class PlayerController : NetworkBehaviour {
          GameManager.Singleton.SpawnNewCoin();
 
          // Add one to the score variable 'count'
-         ++Count;
+         SetCount(Count + 1);
          igg.CoinText = Count.ToString();
       }
    }
-   
+
    void OnCollisionEnter(Collision other)
    {
+      if (!isLocalPlayer) return;
       if (other.collider.CompareTag("Player")) { gm.PlayerInteract(this, other.gameObject.GetComponent<PlayerController>()); }
+   }
+
+   [ClientRpc] public void RefreshScore()
+   {
+      if (isLocalPlayer) igg.CoinText = Count.ToString();
    }
 
 }

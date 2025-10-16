@@ -37,9 +37,9 @@ public class GameManager : NetworkBehaviour
         p.transform.SetParent(pickupRoot);
         p.transform.position = new Vector3(Random.Range(-boxSize, boxSize), Mathf.Floor(Random.Range(0, 2)) * 100 + 1f, Random.Range(-boxSize, boxSize));
         Physics.Raycast(p.transform.position, Vector3.down, out RaycastHit hit, maxDistance: 100000, LayerMask.GetMask("wall"));
-		Debug.DrawRay(p.transform.position, Vector3.down * 5);
-		print(hit.distance);
 		p.transform.position += Vector3.down * (hit.distance - .5f);
+		// Debug.DrawRay(p.transform.position, Vector3.down * 5);
+		// print(hit.distance);
     }
 
     [Command(requiresAuthority=false)]
@@ -51,10 +51,14 @@ public class GameManager : NetworkBehaviour
     [Command(requiresAuthority=false)]
     public void PlayerInteract(PlayerController p1, PlayerController p2)
     {
-        if (p1.Count > ((p2.Count - 2) * 1.2))
-        p1.Count += p2.Count;
-        p2.Count = 0;
-        NetworkServer.UnSpawn(p2.gameObject);
-        NetworkServer.Spawn(p2.gameObject);
+        // print("P1: " + p1.Count + " P2: " + p2.Count);
+        if (p1.Count > (p2.Count * 1.2)) {
+            p1.Count += p2.Count;
+            p2.Count = 0;
+            p1.RefreshScore();
+            p2.RefreshScore();
+            // NetworkServer.UnSpawn(p2.gameObject);
+            // NetworkServer.Spawn(p2.gameObject);
+        }
     }
 }
