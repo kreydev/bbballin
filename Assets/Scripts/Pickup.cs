@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Mirror;
-public enum PType { Coin, Vector, Speedster, Maniac,  }
+public enum PType { Coin, Vector, Speedster, Maniac, Jumper }
 
 [RequireComponent(typeof(Renderer))]
 [RequireComponent(typeof(AudioSource))]
 public class Pickup : NetworkBehaviour
 {
+	[SerializeField] AudioSource pickupSource;
 	public AudioClip pickupSound;
 	Vector3 rotVel;
+
+	public PType type;
 
 
 	void Awake()
@@ -29,16 +32,15 @@ public class Pickup : NetworkBehaviour
 	public void PickedUp()
 	{
 		PlaySounds();
-		StartCoroutine(nameof(PickedUpC));
+		StartCoroutine(PickedUpC());
 	}
 
 	[ClientRpc]
 	void PlaySounds()
 	{
 		GetComponent<Renderer>().enabled = false;
-		AudioSource ac = GetComponent<AudioSource>();
-		ac.pitch = Random.Range(.9f, 1.3f);
-		ac.PlayOneShot(pickupSound);
+		pickupSource.pitch = Random.Range(.9f, 1.3f);
+		pickupSource.PlayOneShot(pickupSound);
 	}
 
 
