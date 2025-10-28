@@ -40,7 +40,7 @@ public class CameraController : MonoBehaviour
    void Start()
    {
       mm = MusicManager.Singleton;
-      if (player == null) return;
+      if (!player.isLocalPlayer) gameObject.SetActive(false);
       // Create an offset by subtracting the Camera's position from the player's position
       offset = transform.localPosition - player.transform.localPosition;
       offset *= Mathf.Log(2) * .5f;

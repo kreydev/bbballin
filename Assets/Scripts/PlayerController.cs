@@ -36,7 +36,7 @@ public class PlayerController : NetworkBehaviour {
    } }
 
 
-   [SerializeField] readonly CameraController cam;
+   [SerializeField] CameraController cam;
 
    public float Size { get { return Count >= 1 ? Mathf.Log(Count + 1) * 2 : 1f; } }
 
@@ -67,7 +67,7 @@ public class PlayerController : NetworkBehaviour {
       if (effectTimes.Count > 0)
          mm.SetPowered(true, effectTypes.Last());
       else
-         mm.SetPowered(false);
+         mm.SetPowered(false, 0);
    }
    
    
@@ -105,11 +105,11 @@ public class PlayerController : NetworkBehaviour {
          // output.sourceObject = this;
       } else
       {
-         cam.gameObject.SetActive(false);
+         if (cam != null) cam.gameObject.SetActive(false);
       }
    }
 
-   [Client] void Update()
+   void Update()
    {
       if (!NetworkClient.isConnected) return;
       if (!isLocalPlayer) return;
@@ -117,7 +117,7 @@ public class PlayerController : NetworkBehaviour {
       if (CanJump && HasEffect(PType.Jumper) && Input.GetKeyDown(KeyCode.Space)) rb.AddForce(jumpVel * Size * Vector3.up, ForceMode.Impulse);
    }
 
-   [Client] void FixedUpdate()
+   void FixedUpdate()
    {
       if (!NetworkClient.isConnected) return;
       if (!isLocalPlayer) return;

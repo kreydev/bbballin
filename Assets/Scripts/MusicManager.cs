@@ -4,7 +4,7 @@ using Mirror;
 using System;
 using System.Linq;
 
-public class MusicManager : MonoBehaviour
+public class MusicManager : NetworkBehaviour
 {
    public static MusicManager Singleton { get { return FindFirstObjectByType<MusicManager>(); } }
    [SerializeField] private AudioSource[] music;
@@ -14,7 +14,7 @@ public class MusicManager : MonoBehaviour
    private AudioMixerSnapshot[] snaps = { null, null };
 
    private float[] weights = { 0, 1 };
-   private readonly int musicDenom = 2;
+   private int musicDenom = 2;
    private PlayerController me;
 
    // public float sens;
@@ -45,7 +45,7 @@ public class MusicManager : MonoBehaviour
    //    // Vol = specdata[freq] > sens ? 10 : 0;
    // }
 
-   private void FixedUpdate()
+   void FixedUpdate()
    {
       for (uint i = 0; i < music.Length; ++i)
       {
@@ -55,16 +55,15 @@ public class MusicManager : MonoBehaviour
       if (me != null) cur = Mathf.Clamp(me.Count / musicDenom / music.Length, 0, music.Length - 1);
    }
 
-   [Client]
-   public void SetCave(bool val)
+   [ClientRpc] public void SetCave(bool val)
    {
       weights[0] = val ? 0 : 1;
       weights[1] = val ? 1 : 0;
       am.TransitionToSnapshots(snaps, weights, .3f);
    }
 
-   [Client]
-   public void SetPowered(bool p, PType t = 0)
+   [ClientRpc]
+   public void SetPowered(bool p, PType t)
    {
       am.GetFloat("PowerupVol", out float vol);
       am.SetFloat("PowerupVol", Mathf.Lerp(vol, p ? 0 : -100, .2f ));
