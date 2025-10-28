@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : NetworkBehaviour {
@@ -121,6 +122,8 @@ public class PlayerController : NetworkBehaviour {
    {
       if (!NetworkClient.isConnected) return;
       if (!isLocalPlayer) return;
+
+      if (Count >= 100) { SceneManager.LoadScene("end"); }
 
       float moveHorizontal = Input.GetAxis("Horizontal");
       float moveVertical = Input.GetAxis("Vertical");

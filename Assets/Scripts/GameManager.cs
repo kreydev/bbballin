@@ -1,10 +1,6 @@
 using System.Collections;
-using System.Threading;
 using Mirror;
-using Mirror.BouncyCastle.Asn1.Gnu;
-using Mirror.BouncyCastle.Crypto.Modes;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class GameManager : NetworkBehaviour
 {
@@ -32,6 +28,8 @@ public class GameManager : NetworkBehaviour
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
         nm = NetworkManager.singleton;
+        nm.networkAddress = "localhost";
+        nm.StartHost();
         StartCoroutine(WaitForNetwork());
     }
 
