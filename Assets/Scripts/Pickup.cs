@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Mirror;
-public enum PType { Coin, Vector, Speedster, Maniac,  }
+public enum PType { Coin, Vector, Speedster, Maniac, Jumper }
 
 [RequireComponent(typeof(Renderer))]
 [RequireComponent(typeof(AudioSource))]
@@ -9,6 +9,7 @@ public class Pickup : NetworkBehaviour
 {
 	public AudioClip pickupSound;
 	Vector3 rotVel;
+	public PType type;
 
 
 	void Awake()
