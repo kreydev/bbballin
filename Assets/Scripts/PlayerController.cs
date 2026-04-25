@@ -24,8 +24,8 @@ public class PlayerController : NetworkBehaviour {
    [SyncVar] [SerializeField] List<float> effectTimes = new();
    [Command(requiresAuthority = false)] void AddEffect(PType e) { effectTypes.Add((e)); effectTimes.Add(45); }
 
-   public bool Walled { get { return Physics.Raycast(transform.position, Vector3.back, maxDistance: (Size + 3) * 1.5f, layerMask: LayerMask.GetMask("wall")); } }
-   public bool Caved { get { return Physics.Raycast(rb.position, Vector3.up, maxDistance: (Size + 3 + caveHeight) * 1.5f, layerMask: LayerMask.GetMask("wall")); } }
+   public bool Walled { get { return netready ? Physics.Raycast(transform.position, Vector3.back, maxDistance: (Size + 3) * 1.5f, layerMask: LayerMask.GetMask("wall")) : false; } }
+   public bool Caved { get { return netready ? Physics.Raycast(rb.position, Vector3.up, maxDistance: (Size + 3 + caveHeight) * 1.5f, layerMask: LayerMask.GetMask("wall")) : false; } }
    public bool CanJump { get {
       float step = 2 * Mathf.Deg2Rad;
       for (float i = 0; i < 2 * Mathf.PI; i += step)
@@ -56,9 +56,12 @@ public class PlayerController : NetworkBehaviour {
          else return null;
       }
    }
+   bool netready = false;
    
    [ClientRpc] void UpdateClientEffects()
    {
+      if (mm == null) return;
+      if (igg == null) return;
       for (int i = 0; i < effectTypes.Count; ++i)
       {
          igg.SetIconState(effectTypes[i], true, effectTimes[i]);
@@ -85,31 +88,28 @@ public class PlayerController : NetworkBehaviour {
             effectTimes[i] -= 0.0167f;
          }
       }
+      if (!isLocalPlayer || !NetworkClient.ready) return;
       UpdateClientEffects();
    }
 
    // At the start of the game..
    void Start()
    {
+      if (!isLocalPlayer) return;
       speed = (float)baseSpeed; // cast to a float to copy instead of referencing
          
       rb = GetComponent<Rigidbody>();
       mm = MusicManager.Singleton;
       gm = GameManager.Singleton;
       igg = IngameGUI.Singleton;
-      if (isLocalPlayer) {
-         SetCount(1);
-         igg.CoinText = Count.ToString();
-         igg.ShowIcons = true;
-         var output = mm.GetComponent<PlayableDirector>().playableAsset.outputs.Where(o => o.streamName == "strack").ElementAt(0);
-         // output.sourceObject = this;
-      } else
-      {
-         cam.gameObject.SetActive(false);
-      }
+      SetCount(1);
+      igg.CoinText = Count.ToString();
+      igg.ShowIcons = true;
+      var output = mm.GetComponent<PlayableDirector>().playableAsset.outputs.Where(o => o.streamName == "strack").ElementAt(0);
+      netready = true;
    }
 
-   [Client] void Update()
+   void Update()
    {
       if (!NetworkClient.isConnected) return;
       if (!isLocalPlayer) return;
@@ -117,7 +117,7 @@ public class PlayerController : NetworkBehaviour {
       if (CanJump && HasEffect(PType.Jumper) && Input.GetKeyDown(KeyCode.Space)) rb.AddForce(jumpVel * Size * Vector3.up, ForceMode.Impulse);
    }
 
-   [Client] void FixedUpdate()
+   void FixedUpdate()
    {
       if (!NetworkClient.isConnected) return;
       if (!isLocalPlayer) return;
@@ -154,13 +154,13 @@ public class PlayerController : NetworkBehaviour {
       mm.SetCave(Caved);
       if (Caved)
       {
-         rb.AddForce(Vector3.up * 10);
+         rb.AddForce(Vector3.up * 8);
       }
 
       EffectsTick();
    }
 
-   void OnTriggerEnter(Collider other)
+   [Client] void OnTriggerEnter(Collider other)
    {
       if (!isLocalPlayer) return;
       if (other.gameObject.CompareTag("Pick Up"))
@@ -182,7 +182,7 @@ public class PlayerController : NetworkBehaviour {
       }
    }
 
-   void OnCollisionEnter(Collision other)
+   [Client] void OnCollisionEnter(Collision other)
    {
       if (!isLocalPlayer) return;
       if (other.collider.CompareTag("Player")) {

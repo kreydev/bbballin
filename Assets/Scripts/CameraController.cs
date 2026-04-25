@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using Mirror;
 
 [RequireComponent(typeof(Camera))]
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
 
    MusicManager mm;
@@ -15,7 +16,7 @@ public class CameraController : MonoBehaviour
    // readonly float sens = 1 / 2f;
    public float FOV { get { return GetComponent<Camera>().fieldOfView; } set { foreach (var c in GetComponentsInChildren<Camera>()) { c.fieldOfView = value + fovset; } } }
 
-
+   bool netready = false;
    private IEnumerator PulseLerp()
    {
       while (fovset > -1.88f) {
@@ -36,20 +37,26 @@ public class CameraController : MonoBehaviour
       StartCoroutine(PulseLerp());
    }
 
-
-   void Start()
+   private IEnumerator WaitForNetwork()
    {
+      yield return new WaitUntil(() => { return player != null; });
+      
       mm = MusicManager.Singleton;
-      if (player == null) return;
       // Create an offset by subtracting the Camera's position from the player's position
       offset = transform.localPosition - player.transform.localPosition;
       offset *= Mathf.Log(2) * .5f;
       initialOffset = transform.localPosition - player.transform.localPosition;
+      netready = true;
    }
 
-   void Update()
+   void Start()
    {
-      if (player == null) return;
+      StartCoroutine(WaitForNetwork());
+   }
+
+   [Client] void Update()
+   {
+      if (!netready) return;
       // mouse = Input.mousePosition;
       // if (!player.Walled)
          transform.LookAt(player.transform);
@@ -59,14 +66,10 @@ public class CameraController : MonoBehaviour
          //TODO: Clamp rotation
    }
 
-   void FixedUpdate()
+   [Client] void FixedUpdate()
    {
+      if (!netready) return;
       fovset = mm.Vol;
-      if (player == null)
-      {
-         FOV = 60; // this is necessary i swear
-         return;
-      }
       FOV = Mathf.Lerp(FOV, player.Caved ? 35 : 60, .2f);
       // if (player.Walled)
       // {

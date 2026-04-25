@@ -61,6 +61,7 @@ public class GameManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void PlayerInteract(PlayerController p1, PlayerController p2)
     {
+        if (p1 == null || p2 == null) return;
         // print("P1: " + p1.Count + " P2: " + p2.Count);
         if (p1.Count > (p2.Count * 1.2))
         {
